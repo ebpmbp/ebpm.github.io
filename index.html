@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EBPM — Developer Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FDF6E3;
+  --paper2:#FFFDF5;
+  --ink:#1A1611;
+  --muted:#7A6E5E;
+  --line:#1A1611;
+  --line-soft:#D8CFC0;
+  --accent:#B45309;
+  --accent-soft:#FEF3C7;
+  --green:#166534;
+  --red:#991B1B;
+  --card:#FFFEF9;
+  --term-bg:#1A1611;
+  --term-fg:#FDE68A;
+  --term-dim:#A8A29E;
+  --grid:rgba(26,22,17,.07);
+  --accent-oklch: oklch(0.55 0.14 70);
+}
+[data-theme="dark"]{
+  --paper:#171412;
+  --paper2:#1F1B18;
+  --ink:#F5EFE6;
+  --muted:#A8A29E;
+  --line:#F5EFE6;
+  --line-soft:#3A342E;
+  --accent:#F59E0B;
+  --accent-soft:#3A2E14;
+  --green:#4ADE80;
+  --red:#F87171;
+  --card:#231F1C;
+  --term-bg:#0F0D0B;
+  --term-fg:#FDE68A;
+  --grid:rgba(245,239,230,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"JetBrains Mono","Noto Sans SC",monospace;
+  font-size:15px;line-height:1.65;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:32px 32px;
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+/* top bar */
+.topbar{
+  border-bottom:1.5px solid var(--line);
+  background:var(--paper);
+  position:sticky;top:0;z-index:50;
+}
+.topbar__in{display:flex;align-items:center;gap:16px;min-height:56px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.02em}
+.logo__mark{width:28px;height:28px;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;background:var(--ink);color:var(--paper)}
+.nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.nav a,.nav button{
+  font-size:13px;padding:10px 12px;border:1.5px solid transparent;background:none;color:var(--ink);
+  min-height:44px;display:inline-flex;align-items:center;
+}
+.nav a:hover,.nav button:hover{border-color:var(--line);background:var(--card)}
+.nav .dot{color:var(--accent)}
+.status-pill{font-size:11px;border:1.5px solid var(--line);padding:6px 10px;background:var(--accent-soft)}
+.status-pill b{color:var(--green)}
+[data-theme="dark"] .status-pill b{color:var(--green)}
+/* hero */
+.hero{border-bottom:1.5px solid var(--line);background:var(--paper2)}
+.hero__in{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;padding:36px 0 32px}
+.kicker{font-size:12px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;display:flex;gap:8px;align-items:center}
+.kicker::before{content:"";width:24px;height:1.5px;background:var(--accent)}
+h1{font-size:56px;line-height:.95;letter-spacing:-.04em;margin:10px 0 12px;font-weight:700}
+h1 .thin{font-weight:400;color:var(--muted)}
+.role-typed{font-size:17px;min-height:28px}
+.role-typed .cursor{display:inline-block;width:9px;height:1.1em;background:var(--accent);vertical-align:text-bottom;animation:blink 1s steps(1) infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.lead{color:var(--muted);max-width:54ch;margin-top:10px;font-size:14px}
+.lead code{background:var(--accent-soft);padding:1px 6px;border:1px solid var(--line-soft);font-size:12px}
+.hero__side{border:1.5px solid var(--line);background:var(--card);padding:16px;display:flex;flex-direction:column;gap:12px}
+.stat-row{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line-soft);padding-bottom:8px;font-size:13px}
+.stat-row:last-child{border-bottom:none}
+.stat-row span{color:var(--muted)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn{border:1.5px solid var(--line);padding:0 18px;min-height:44px;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;background:var(--ink);color:var(--paper)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--line)}
+/* terminal */
+.terminal{border:1.5px solid var(--line);background:var(--term-bg);color:var(--term-fg);margin:0 0 0}
+.term-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #333;background:#221E1A;color:#D6D3D1;font-size:12px}
+[data-theme="dark"] .term-head{background:#1A1715}
+.tdot{width:11px;height:11px;border-radius:50%;border:1px solid #555}
+.tdot:nth-child(1){background:#EF4444}.tdot:nth-child(2){background:#F59E0B}.tdot:nth-child(3){background:#22C55E}
+.term-body{padding:14px 16px;min-height:180px;max-height:240px;overflow-y:auto;font-size:13px;line-height:1.7}
+.term-body .dim{color:var(--term-dim)}
+.term-body .ok{color:#4ADE80}
+.input-line{display:flex;gap:8px;align-items:center;border-top:1px solid #333;padding:10px 16px;background:#221E1A;color:#FDE68A}
+.input-line input{flex:1;background:none;border:none;outline:none;color:#FDE68A;font-family:inherit;font-size:13px;min-height:36px}
+.hint{font-size:11px;color:var(--term-dim);padding:8px 16px 12px;background:#221E1A}
+/* section header */
+.section{padding:30px 0 8px}
+.sec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:18px}
+.sec-head h2{font-size:22px;letter-spacing:-.02em}
+.sec-head .no{font-size:12px;background:var(--ink);color:var(--paper);padding:4px 8px}
+.sec-head .en{font-size:12px;color:var(--muted);letter-spacing:.12em}
+.sec-head .right{margin-left:auto;font-size:12px;color:var(--muted)}
+/* filters */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.fbtn{border:1.5px solid var(--line);background:var(--card);padding:0 14px;min-height:38px;font-size:12px;font-weight:700}
+.fbtn.active{background:var(--ink);color:var(--paper)}
+.search{margin-left:auto;display:flex;gap:0}
+.search input{border:1.5px solid var(--line);border-right:none;padding:0 12px;min-height:38px;background:var(--card);color:var(--ink);font-family:inherit;font-size:13px;width:200px;outline:none}
+.search button{border:1.5px solid var(--line);background:var(--accent-soft);padding:0 14px;min-height:38px;font-size:12px;font-weight:700}
+.count{font-size:12px;color:var(--muted)}
+/* grid cards */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.card{border:1.5px solid var(--line);background:var(--card);display:flex;flex-direction:column;overflow:hidden}
+.card:hover{box-shadow:5px 5px 0 var(--line);transform:translate(-1px,-1px)}
+.card__top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line-soft);font-size:12px}
+.lang{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.lang i{width:9px;height:9px;background:var(--accent);display:inline-block}
+.card__body{padding:16px 14px;flex:1}
+.card h3{font-size:17px;margin-bottom:6px}
+.card h3 a:hover{text-decoration:underline;text-underline-offset:4px}
+.card p{font-size:13px;color:var(--muted);margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;border:1px solid var(--line-soft);padding:4px 8px;background:var(--paper)}
+.code-block{border:1px solid var(--line-soft);background:var(--paper);padding:10px 12px;font-size:11px;line-height:1.6;overflow-x:auto;white-space:pre;color:var(--muted);margin-top:10px}
+.code-block b{color:var(--accent);font-weight:700}
+.card__foot{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line-soft);font-size:12px;align-items:center;flex-wrap:wrap}
+.card__foot .meta{margin-left:auto;color:var(--muted)}
+.small-btn{border:1.5px solid var(--line);padding:10px 12px;min-height:38px;font-size:12px;font-weight:700;background:var(--paper2)}
+.small-btn:hover{background:var(--ink);color:var(--paper)}
+.star{color:var(--accent)}
+/* stack strip */
+.stack{display:flex;gap:8px;flex-wrap:wrap;padding:14px;border:1.5px dashed var(--line);background:var(--paper2);font-size:12px}
+.stack b{background:var(--ink);color:var(--paper);padding:4px 8px}
+.stack span{border:1px solid var(--line-soft);padding:4px 8px;background:var(--card)}
+/* lab note */
+.note{border:1.5px solid var(--line);background:var(--accent-soft);padding:14px 16px;font-size:13px;display:flex;gap:12px;align-items:flex-start}
+.note__ic{font-size:20px;line-height:1}
+/* toast */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--ink);color:var(--paper);border:1.5px solid var(--line);padding:12px 16px;font-size:13px;box-shadow:5px 5px 0 var(--line);transform:translateY(20px);opacity:0;pointer-events:none;transition:.2s;z-index:100;max-width:90vw}
+.toast.show{transform:none;opacity:1}
+footer{border-top:1.5px solid var(--line);margin-top:36px;padding:18px 0 36px;font-size:12px;color:var(--muted);background:var(--paper2)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.empty{border:1.5px dashed var(--line);padding:28px;text-align:center;color:var(--muted);font-size:13px;background:var(--paper2)}
+@media(max-width:860px){
+  .hero__in{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  h1{font-size:42px}
+  .search{margin-left:0;width:100%}
+  .search input{flex:1;width:auto}
+}
+</style>
+</head>
+<body data-theme="light">
+<div class="topbar"><div class="wrap topbar__in">
+  <a class="logo" href="#"><span class="logo__mark">&gt;_</span> EBPM.LAB <span style="font-weight:400;color:var(--muted);font-size:12px">v2026.01</span></a>
+  <nav class="nav">
+    <a href="#projects"><span class="dot">●</span> PROJECTS</a>
+    <a href="#stack">STACK</a>
+    <a href="#contact">CONTACT</a>
+    <button id="themeBtn" aria-label="切换主题">◐ THEME</button>
+  </nav>
+  <span class="status-pill"><b>●</b> <span id="clock">--:--:--</span> · <span id="uptime">up 00:00:00</span></span>
+</div></div>
+
+<header class="hero"><div class="wrap hero__in">
+  <div>
+    <div class="kicker">DEVELOPER LAB — 开发者实验室</div>
+    <h1>EBPM<br><span class="thin">BUILD / OPEN / SHIP</span></h1>
+    <div class="role-typed"><span id="typed"></span><span class="cursor"></span></div>
+    <p class="lead">全栈开发 · 专注 <code>工具链 / 自动化 / Web应用</code>。这里是我的公开实验台，记录正在构建的东西。</p>
+    <div class="btns">
+      <a class="btn" href="#projects">查看作品 ↓</a>
+      <a class="btn ghost" href="https://github.com/ebpmbp" target="_blank" rel="noopener">GitHub ↗</a>
+      <button class="btn ghost" id="copyBtn">复制邮箱</button>
+    </div>
+  </div>
+  <div class="hero__side">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <b style="font-size:12px;letter-spacing:.1em">~/LAB_PROFILE</b><span style="font-size:11px;color:var(--muted)">[empty-localhost]</span>
+    </div>
+    <div class="stat-row"><span>身份</span><b>全栈开发者</b></div>
+    <div class="stat-row"><span>主语言</span><b>Python / TypeScript</b></div>
+    <div class="stat-row"><span>方向</span><b>DevTools · AI 工具</b></div>
+    <div class="stat-row"><span>状态</span><b style="color:var(--green)">● 开放合作中</b></div>
+    <div style="font-size:11px;color:var(--muted);border:1px dashed var(--line-soft);padding:10px;background:var(--paper)">PLACEHOLDER — 所有信息为占位内容，替换为真实资料后发布。</div>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <!-- TERMINAL -->
+  <div class="terminal" style="margin-top:20px">
+    <div class="term-head"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span> <span style="margin-left:6px">guest@ebpm: ~/lab — interactive</span> <span style="margin-left:auto;font-size:11px;color:#A8A29E">try: help</span></div>
+    <div class="term-body" id="termBody">
+      <div><span class="dim">Last login: Thu Nov 6 18:00 on ttys000</span></div>
+      <div>欢迎来到 EBPM.LAB，输入 <span class="ok">help</span> 查看可用命令，或输入 <span class="ok">whoami</span> / <span class="ok">skills</span> / <span class="ok">contact</span> / <span class="ok">clear</span></div>
+      <div class="dim">────────────────────────────────────────</div>
+    </div>
+    <div class="input-line"><span style="color:#4ADE80">guest@ebpm</span><span style="color:#A8A29E">:</span><span>~/lab</span><span style="color:#F59E0B">$</span> <input id="termInput" placeholder="type command here..." autocomplete="off" aria-label="terminal input"></div>
+    <div class="hint">COMMANDS: help · whoami · skills · projects · contact · clear &nbsp;|&nbsp; ↑↓ 回车执行 · 注意移动端键盘</div>
+  </div>
+
+  <!-- PROJECTS -->
+  <div class="section" id="projects">
+    <div class="sec-head"><span class="no">[01]</span><h2>项目作品</h2><span class="en">SELECTED PROJECTS</span><span class="right" id="projCount">6 repos</span></div>
+    <div class="filters">
+      <button class="fbtn active" data-filter="all">ALL 全部</button>
+      <button class="fbtn" data-filter="python">Python</button>
+      <button class="fbtn" data-filter="typescript">TypeScript</button>
+      <button class="fbtn" data-filter="tools">Tools 工具</button>
+      <button class="fbtn" data-filter="ai">AI</button>
+      <div class="search"><input id="searchInput" placeholder="过滤项目... / filter"><button>🔍</button></div>
+      <span class="count" id="countLabel">显示 6 / 6</span>
+    </div>
+    <div class="grid" id="projectGrid"></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px">* 示例数据 — 点击卡片有跳转效果，正式版替换为真实仓库链接。</p>
+  </div>
+
+  <!-- STACK -->
+  <div class="section" id="stack">
+    <div class="sec-head"><span class="no">[02]</span><h2>技术栈</h2><span class="en">STACK / TOOLCHAIN</span></div>
+    <div class="stack"><b>STACK</b><span>Python</span><span>TypeScript</span><span>Node.js</span><span>Docker</span><span>Git</span><span>FastAPI</span><span>React / Vue</span><span>Linux</span><span>CLI</span><span>SQLite / Postgres</span></div>
+    <div class="note" style="margin-top:12px"><span class="note__ic">⚠</span><div><b>实验室原则：</b> 先能跑，再优化。所有项目都必须有 README、一键启动脚本和示例数据。占位处理：不展示私有仓库明细。</div></div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="section" id="contact">
+    <div class="sec-head"><span class="no">[03]</span><h2>联系</h2><span class="en">CONTACT</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="contact-grid">
+      <a href="https://github.com/ebpmbp" target="_blank" rel="noopener" style="border:1.5px solid var(--line);padding:16px;background:var(--card);display:block"><b>GitHub ↗</b><div style="font-size:12px;color:var(--muted);margin-top:4px">github.com/ebpmbp</div></a>
+      <button id="mailBtn" style="border:1.5px solid var(--line);padding:16px;background:var(--card);text-align:left"><b>📧 hello@ebpm.dev</b><div style="font-size:12px;color:var(--muted);margin-top:4px">点击复制邮箱</div></button>
+    </div>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <span>© 2026 EBPM.LAB — placeholder build · 用 HTML/CSS/JS 静态构建，无后端</span>
+  <span>built with <a href="#" style="text-decoration:underline">opendesign</a> · <span id="year"></span></span>
+</div></footer>
+
+<div class="toast" id="toast">已复制邮箱</div>
+
+<script>
+const projects=[
+ {title:"auto-setup",desc:"一键开发环境初始化脚本，检测系统、安装依赖、配置 shell、生成 SSH key，适配 macOS/Linux。",lang:"Python",langClass:"python",tags:["cli","automation","docker"],example:"$ ./setup.sh --profile full\n✓ python 3.12\n✓ node 20\n✓ docker ready",stars:128,forks:12,updated:"2天前"},
+ {title:"loglens",desc:"终端日志实时过滤与高亮工具，支持多文件 tail、正则过滤、错误聚合，专为排查线上问题而生。",lang:"Python",langClass:"python",tags:["cli","devops"],example:"$ loglens app.log --level ERROR\n[14:02:11] ERROR db timeout",stars:96,forks:8,updated:"5天前"},
+ {title:"pageforge",desc:"Markdown → 静态站生成器，零依赖、单文件部署，自动生成目录、代码高亮与 RSS。",lang:"TypeScript",langClass:"typescript",tags:["ssg","markdown"],example:"$ pageforge build ./posts\n✓ 42 pages · 380KB",stars:210,forks:21,updated:"1周前"},
+ {title:"prompt-studio",desc:"本地 AI 提示词工作台，支持模板变量、版本对比与一键导出到不同模型格式。",lang:"TypeScript",langClass:"typescript ai",tags:["ai","ui"],example:"$ npm run dev\n→ http://localhost:5173",stars:342,forks:34,updated:"3天前"},
+ {title:"dotfiles-manager",desc:"跨机器同步 dotfiles，加密备份、模糊匹配、私钥安全存储，告别手动 cp。",lang:"Python",langClass:"python tools",tags:["dotfiles","security"],example:"$ dotctl sync --encrypt\nhost: macbook ✓",stars:54,forks:3,updated:"1月前"},
+ {title:"api-scout",desc:"接口文档自动生成与沙盒调试面板，粘贴 OpenAPI 即可在线发请求、看耗时与状态码。",lang:"TypeScript",langClass:"typescript tools",tags:["api","playground"],example:"GET /v1/users → 200 (42ms)",stars:187,forks:19,updated:"4天前"}
+];
+const grid=document.getElementById('projectGrid');
+let curFilter='all', curQuery='';
+
+function render(){
+  const list=projects.filter(p=>{
+    const matchF=curFilter==='all'||p.langClass.includes(curFilter);
+    const q=curQuery.trim().toLowerCase();
+    const matchQ=!q||p.title.toLowerCase().includes(q)||p.desc.includes(q)||p.tags.join(' ').includes(q);
+    return matchF&&matchQ;
+  });
+  document.getElementById('countLabel').textContent=`显示 ${list.length} / ${projects.length}`;
+  document.getElementById('projCount').textContent=`${projects.length} repos`;
+  if(!list.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">没有匹配的项目 — 试试清除搜索或切换 ALL<br><span style="font-size:11px">NO RESULTS · check filter</span></div>';return}
+  grid.innerHTML=list.map(p=>`
+  <article class="card">
+    <div class="card__top"><span class="lang"><i></i>${p.lang}</span><span style="color:var(--muted)">ebpmbp/${p.title}</span></div>
+    <div class="card__body">
+      <h3><a href="https://github.com/ebpmbp" target="_blank" rel="noopener">${p.title} ↗</a></h3>
+      <p>${p.desc}</p>
+      <div class="tags">${p.tags.map(t=>`<span class="tag">#${t}</span>`).join('')}</div>
+      <div class="code-block">${p.example}</div>
+    </div>
+    <div class="card__foot"><span class="star">★ ${p.stars}</span><span>⑂ ${p.forks}</span><span class="meta">${p.updated} 更新</span></div>
+  </article>`).join('');
+}
+render();
+
+document.querySelectorAll('.fbtn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');curFilter=b.dataset.filter;render();
+}));
+document.getElementById('searchInput').addEventListener('input',e=>{curQuery=e.target.value;render()});
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){document.getElementById('toast').textContent='已过滤：'+curQuery;showToast()}});
+
+// theme
+const themeBtn=document.getElementById('themeBtn');
+themeBtn.addEventListener('click',()=>{
+  const b=document.body;
+  const next=b.dataset.theme==='light'?'dark':'light';
+  b.dataset.theme=next;
+  themeBtn.textContent=next==='light'?'◐ THEME':'◑ THEME';
+  showToast(next==='light'?'已切换为浅色暖纸':'已切换为深色暖黑');
+});
+
+// clock + uptime
+const start=Date.now();
+function tick(){
+  const d=new Date();
+  document.getElementById('clock').textContent=d.toLocaleTimeString('zh-CN',{hour12:false});
+  const s=Math.floor((Date.now()-start)/1000);
+  const h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),sec=String(s%60).padStart(2,'0');
+  document.getElementById('uptime').textContent=`up ${h}:${m}:${sec}`;
+}
+tick();setInterval(tick,1000);
+
+// typed
+const roles=['全栈开发 — Python / TypeScript','工具与自动化工程师','Open Source 爱好者','把想法做成工具的人'];
+let ri=0,ci=0,del=false;
+const typedEl=document.getElementById('typed');
+function typeLoop(){
+  const cur=roles[ri];
+  typedEl.textContent=cur.slice(0,ci);
+  if(!del&&ci<cur.length){ci++;setTimeout(typeLoop,60)}
+  else if(!del&&ci===cur.length){del=true;setTimeout(typeLoop,1400)}
+  else if(del&&ci>0){ci--;setTimeout(typeLoop,30)}
+  else{del=false;ri=(ri+1)%roles.length;setTimeout(typeLoop,300)}
+}
+typeLoop();
+
+// terminal
+const termBody=document.getElementById('termBody');
+const termInput=document.getElementById('termInput');
+const cmds={
+ help(){print(['可用命令:','  whoami    — 介绍自己','  skills    — 技术栈','  projects  — 项目列表（跳转）','  contact   — 联系方式','  clear     — 清屏'])},
+ whoami(){print(['EBPM · 全栈开发者','专注工具链 / 自动化 / Web 应用','这里是占位文案，正式版替换为真实简介。'])},
+ skills(){print(['Python · TypeScript · Node · Docker · FastAPI','React/Vue · Linux · Git · CI'],'ok')},
+ projects(){print(['项目列表（共 '+projects.length+' 个）：','  - auto-setup (Python)','  - loglens (Python)','  - pageforge (TypeScript)','  - prompt-studio (TypeScript+AI)','  → 已滚动到项目区 ↓']);document.getElementById('projects').scrollIntoView({behavior:'smooth'})},
+ contact(){print(['GitHub: https://github.com/ebpmbp','Email: hello@ebpm.dev（点击顶部按钮复制）'])},
+ clear(){termBody.innerHTML='';return false}
+};
+function print(lines,cls){lines.forEach(l=>{const d=document.createElement('div');if(cls)d.className=cls;d.textContent=l;termBody.appendChild(d)});termBody.scrollTop=termBody.scrollHeight}
+termInput.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  const v=termInput.value.trim();
+  if(!v)return;
+  const line=document.createElement('div');
+  line.innerHTML=`<span style="color:#4ADE80">guest@ebpm</span>:<span>~/lab</span> <span style="color:#F59E0B">$</span> ${v}`;
+  termBody.appendChild(line);
+  termInput.value='';
+  const fn=cmds[v.toLowerCase()];
+  if(fn){const r=fn();if(r===false)return}
+  else{print([`command not found: ${v} — 试试 help`],'')}
+  termBody.scrollTop=termBody.scrollHeight;
+});
+
+// toast copy
+function showToast(msg){
+  const t=document.getElementById('toast');
+  if(msg)t.textContent=msg;
+  t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),1800);
+}
+async function copyEmail(){
+  const email='hello@ebpm.dev';
+  try{await navigator.clipboard.writeText(email)}catch(e){}
+  showToast('已复制：'+email);
+}
+document.getElementById('copyBtn').addEventListener('click',copyEmail);
+document.getElementById('mailBtn').addEventListener('click',copyEmail);
+
+document.getElementById('year').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
